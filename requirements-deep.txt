@@ -1,0 +1,10 @@
+# Deep-learning stack — A3 (spectrogram CNN), A4 (YOLOv8), A5 (acoustic CNN).
+# Heavier (~2-3 GB). Install after core:  pip install -r requirements-deep.txt
+# CPU wheels by default; for GPU follow https://pytorch.org install selector.
+torch>=2.2
+torchvision>=0.17
+torchaudio>=2.2
+ultralytics>=8.2      # YOLOv8
+librosa>=0.10         # MFCC / audio features (A5)
+soundfile>=0.12
+opencv-python>=4.9    # webcam capture / frame I/O (A4)
