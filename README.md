@@ -29,6 +29,40 @@ Outputs land in `models/` (artifacts) and `reports/` (A9 tables + plots).
 
 ---
 
+## Live detection (real-time runtime) — `ml/runtime/`
+
+The tasks above are the **offline brain** (train / evaluate). The runtime layer is
+the **real-time front-end** that makes the system behave like a deployed detector:
+a continuous loop that captures live RF, runs it through the ML stack, and fires
+physical alerts — the same shape as the original Team-Nayara single-file detector,
+but driven by a confident, explained ML verdict instead of a raw power threshold.
+
+```
+capture (RTL-SDR @ 2.44 GHz) ─► A1 RF class ─► A2 fingerprint ─► A6 anomaly
+        + Wi-Fi SSID scan ────────────────────────────────────┘
+                                   └─► A7 threat score ─► A8 explanation
+                                            └─► alert cascade: CSV + buzzer(GPIO18) + Telegram
+```
+
+```powershell
+# Laptop demo (no SDR needed — runs on mock captures, console + CSV only):
+python -m ml.runtime.live_detector --once --mock --simulate DJI_Mavic
+python -m ml.runtime.live_detector --mock            # continuous mock loop
+
+# Raspberry Pi (real RTL-SDR + buzzer + Telegram). Auto-detects hardware:
+$env:TELEGRAM_BOT_TOKEN="..."; $env:TELEGRAM_CHAT_ID="..."
+python -m ml.runtime.live_detector --interval 2 --threshold 60
+```
+
+It auto-switches: **real** `rtl_sdr` + GPIO buzzer + `nmcli` Wi-Fi scan when present
+(the Pi), **mock/no-op** otherwise (this laptop) — same command either way. Needs
+A1 trained first (`python run_all.py`); A2/A6 load if trained, else skip cleanly.
+Pi extras: `pip install -r requirements-runtime.txt` + `sudo apt install rtl-sdr`.
+Detections are appended to `reports/live_detections.csv`. Full reference:
+[`ml/runtime/README.md`](ml/runtime/README.md).
+
+---
+
 ## Full walkthrough — what to do, step by step
 
 If you just cloned this repo and want to go from zero to real results, follow
